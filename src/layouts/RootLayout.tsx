@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigation } from 'react-router-dom'
 
 export default function RootLayout() {
   const navigation = useNavigation()
+  // React Router v6 sets navigation.state to 'loading' when fetching data via loaders during route transition
   const isLoading = navigation.state === 'loading'
 
   return (
