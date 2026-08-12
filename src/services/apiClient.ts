@@ -8,19 +8,57 @@ const LOOKUP_BASE_URL = 'https://itunes.apple.com/lookup'
 const CACHE_KEY_TOP_PODCASTS = 'top-podcasts'
 const CACHE_KEY_PODCAST_DETAIL_PREFIX = 'podcast-detail-'
 
-// Resilient fetching wrapper with fallback to proxy
+// Helper to make JSONP requests since iTunes API supports JSONP natively
+function fetchJsonp<T>(url: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const callbackName = `jsonp_callback_${Math.round(Math.random() * 1000000)}`
+    
+    ;(window as any)[callbackName] = (data: T) => {
+      cleanup()
+      resolve(data)
+    }
+
+    const script = document.createElement('script')
+    const separator = url.includes('?') ? '&' : '?'
+    script.src = `${url}${separator}callback=${callbackName}`
+    script.async = true
+
+    script.onerror = () => {
+      cleanup()
+      reject(new Error(`JSONP request failed for ${url}`))
+    }
+
+    function cleanup() {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script)
+      }
+      delete (window as any)[callbackName]
+    }
+
+    document.head.appendChild(script)
+  })
+}
+
+// Resilient fetching wrapper: Try JSONP first, fallback to direct, then to proxy
 async function fetchWithFallback<T>(url: string): Promise<T> {
   try {
-    // 1. Try to fetch directly (fastest, modern iTunes CDN supports CORS)
+    // 1. Try JSONP directly (immune to CORS, fast, and natively supported by iTunes)
+    return await fetchJsonp<T>(url)
+  } catch (e) {
+    console.warn(`JSONP fetch failed for ${url}, trying direct fetch:`, e)
+  }
+
+  try {
+    // 2. Try direct fetch (just in case)
     const response = await fetch(url)
     if (response.ok) {
       return await response.json()
     }
   } catch (e) {
-    console.warn(`Direct fetch failed for ${url}, falling back to proxy:`, e)
+    console.warn(`Direct fetch failed for ${url}, trying proxy:`, e)
   }
 
-  // 2. If direct fetch fails, fallback to CORS proxy
+  // 3. Last resort: Fallback to AllOrigins proxy
   const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
   const response = await fetch(proxyUrl)
   if (!response.ok) {
@@ -36,7 +74,7 @@ export const apiClient = {
     const cached = cacheService.get<Podcast[]>(CACHE_KEY_TOP_PODCASTS)
     if (cached) return cached
 
-    // 2. Fetch data (with proxy fallback)
+    // 2. Fetch data (with fallback pipeline)
     const rawData = await fetchWithFallback<iTunesFeedResponse>(TOP_PODCASTS_URL)
 
     // 3. Map to Domain model
@@ -66,7 +104,7 @@ export const apiClient = {
     const cached = cacheService.get<PodcastDetail>(cacheKey)
     if (cached) return cached
 
-    // 2. Fetch data (with proxy fallback)
+    // 2. Fetch data (with fallback pipeline)
     const targetUrl = `${LOOKUP_BASE_URL}?id=${podcastId}&media=podcast&entity=podcastEpisode&limit=20`
     const rawData = await fetchWithFallback<iTunesLookupResponse>(targetUrl)
     const results = rawData.results || []
