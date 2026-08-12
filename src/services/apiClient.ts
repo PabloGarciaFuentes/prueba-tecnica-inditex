@@ -8,9 +8,26 @@ const LOOKUP_BASE_URL = 'https://itunes.apple.com/lookup'
 const CACHE_KEY_TOP_PODCASTS = 'top-podcasts'
 const CACHE_KEY_PODCAST_DETAIL_PREFIX = 'podcast-detail-'
 
-// Helper to construct proxy URL
-function getProxyUrl(url: string): string {
-  return `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+// Resilient fetching wrapper with fallback to proxy
+async function fetchWithFallback<T>(url: string): Promise<T> {
+  try {
+    // 1. Try to fetch directly (fastest, modern iTunes CDN supports CORS)
+    const response = await fetch(url)
+    if (response.ok) {
+      return await response.json()
+    }
+  } catch (e) {
+    console.warn(`Direct fetch failed for ${url}, falling back to proxy:`, e)
+  }
+
+  // 2. If direct fetch fails, fallback to CORS proxy
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+  const response = await fetch(proxyUrl)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch from proxy: ${response.statusText}`)
+  }
+  const json = await response.json()
+  return JSON.parse(json.contents) as T
 }
 
 export const apiClient = {
@@ -19,15 +36,8 @@ export const apiClient = {
     const cached = cacheService.get<Podcast[]>(CACHE_KEY_TOP_PODCASTS)
     if (cached) return cached
 
-    // 2. Fetch via proxy
-    const targetUrl = TOP_PODCASTS_URL
-    const response = await fetch(getProxyUrl(targetUrl))
-    if (!response.ok) {
-      throw new Error(`Failed to fetch top podcasts: ${response.statusText}`)
-    }
-
-    const json = await response.json()
-    const rawData: iTunesFeedResponse = JSON.parse(json.contents)
+    // 2. Fetch data (with proxy fallback)
+    const rawData = await fetchWithFallback<iTunesFeedResponse>(TOP_PODCASTS_URL)
 
     // 3. Map to Domain model
     const entries = rawData.feed.entry || []
@@ -56,15 +66,9 @@ export const apiClient = {
     const cached = cacheService.get<PodcastDetail>(cacheKey)
     if (cached) return cached
 
-    // 2. Fetch via proxy
+    // 2. Fetch data (with proxy fallback)
     const targetUrl = `${LOOKUP_BASE_URL}?id=${podcastId}&media=podcast&entity=podcastEpisode&limit=20`
-    const response = await fetch(getProxyUrl(targetUrl))
-    if (!response.ok) {
-      throw new Error(`Failed to fetch podcast detail: ${response.statusText}`)
-    }
-
-    const json = await response.json()
-    const rawData: iTunesLookupResponse = JSON.parse(json.contents)
+    const rawData = await fetchWithFallback<iTunesLookupResponse>(targetUrl)
     const results = rawData.results || []
 
     if (results.length === 0) {

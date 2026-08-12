@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import RootLayout from './layouts/RootLayout'
-import MainPage from './pages/MainPage'
+import MainPage, { loader as mainPageLoader } from './pages/MainPage'
 import PodcastPage from './pages/PodcastPage'
 import EpisodePage from './pages/EpisodePage'
 
@@ -12,6 +12,7 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <MainPage />,
+        loader: mainPageLoader,
       },
       {
         path: 'podcast/:podcastId',
