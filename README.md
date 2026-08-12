@@ -1,32 +1,67 @@
-# React + TypeScript + Vite
+# Prueba Técnica Frontend - Inditex (Podcaster)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicación web Single Page Application (SPA) para buscar, detallar y escuchar podcasts musicales. Proyecto desarrollado con **React**, **TypeScript**, **Vite** y **Tailwind CSS v4** enfocado a un perfil de desarrollo **Senior**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Arquitectura y Decisiones de Diseño
 
-## React Compiler
+### 1. Sistema de Carga Nivel Senior (Resiliencia ante CORS)
+*   **JSONP como Mecanismo Principal**: Aunque las especificaciones del PDF sugerían el uso del proxy de CORS de *AllOrigins*, los servidores de proxies gratuitos sufren caídas frecuentes o bloqueos por parte del CDN de Apple (errores Cloudflare 522). Al descubrir que la API de iTunes soporta **JSONP** de forma nativa (`&callback=`), he implementado un wrapper en [apiClient.ts](src/services/apiClient.ts) que inyecta elementos `<script>` de forma dinámica y limpia.
+*   **Inmunidad a CORS**: JSONP es completamente inmune al bloqueo de CORS por diseño del navegador.
+*   **Fallback en Cascada**: Si JSONP fallase, el cliente API pasa de forma automática a intentar la petición directa y, como último recurso, a través del proxy de *AllOrigins*, garantizando que la aplicación nunca se quede colgada.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Motor de Caché Personalizado (24 Horas)
+*   Se implementó [cacheService.ts](src/services/cacheService.ts) para almacenar la lista de los 100 podcasts principales y los detalles de cada podcast individual en `localStorage`.
+*   Cada entrada almacena los datos y un timestamp. Al recuperar datos, el servicio valida si han transcurrido más de 24 horas; si es así, elimina la entrada de la caché de forma proactiva y devuelve `null` para forzar un refresco desde la API.
 
-## Expanding the Oxlint configuration
+### 3. Indicador de Carga Global
+*   La cabecera contiene un indicador de carga visual (un punto parpadeante azul en la esquina superior derecha).
+*   Se sincroniza con el estado de navegación global de **React Router v6** (`useNavigation().state === 'loading'`).
+*   Los datos se obtienen mediante **Loaders** de rutas. Cuando el usuario navega, el indicador se activa automáticamente durante el tiempo de respuesta de la API (solo cuando no hay caché) y desaparece de forma fluida una vez la nueva vista es renderizada.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### 4. Cobertura de Tests (Vitest)
+*   Aunque la prueba no lo exigía, se configuró **Vitest** y **jsdom** para implementar pruebas unitarias básicas sobre los formateadores y el servicio de caché (utilizando temporizadores simulados con `vi.useFakeTimers()`).
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+---
+
+## 🛠️ Requisitos de Ejecución
+
+Asegúrate de tener instalado **Node.js** (versión v18 o superior recomendada).
+
+### Instalación de dependencias:
+```bash
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### 1. Ejecución en Modo Desarrollo (Assets sin minimizar)
+Ejecuta el servidor de desarrollo local con soporte HMR:
+```bash
+npm run dev
+```
+Accede a la URL indicada en consola (normalmente `http://localhost:5173/`).
+
+### 2. Ejecución en Modo Producción (Assets concatenados y minimizados)
+Compila el proyecto optimizando y minimizando el código en la carpeta `dist/` y levanta el servidor de previsualización:
+```bash
+npm run build
+npm run preview
+```
+Accede a la URL de producción indicada (normalmente `http://localhost:4173/`).
+
+### 3. Ejecución de Tests
+Corre los tests unitarios creados para el proyecto:
+```bash
+npm run test
+```
+
+---
+
+## 📂 Estructura del Proyecto
+
+*   `src/components/`: Componentes comunes e independientes (ej. `PodcastSidebar`).
+*   `src/layouts/`: Plantillas base (`RootLayout`).
+*   `src/pages/`: Vistas de la aplicación (`MainPage`, `PodcastPage`, `EpisodePage`).
+*   `src/services/`: Motor de caché y cliente API.
+*   `src/types/`: Tipados y contratos de datos.
+*   `src/utils/`: Formateadores de fecha y duración.
