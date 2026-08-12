@@ -39,8 +39,11 @@ export default function MainPage() {
         </span>
         {/* Filter Input */}
         <input
+          id="podcast-search-filter"
+          name="searchFilter"
           type="text"
           placeholder="Filter podcasts..."
+          aria-label="Filter podcasts by title or author"
           onChange={handleFilterChange}
           className="w-full max-w-xs px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
         />
@@ -52,7 +55,7 @@ export default function MainPage() {
           No podcasts match your search.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-16 mt-20">
           {filteredPodcasts.map((podcast) => (
             <Link
               key={podcast.id}

@@ -1,12 +1,12 @@
 # Prueba Técnica Frontend - Inditex (Podcaster)
 
-Aplicación web Single Page Application (SPA) para buscar, detallar y escuchar podcasts musicales. Proyecto desarrollado con **React**, **TypeScript**, **Vite** y **Tailwind CSS v4** enfocado a un perfil de desarrollo **Senior**.
+Aplicación web Single Page Application (SPA) para buscar, detallar y escuchar podcasts musicales. Proyecto desarrollado con **React**, **TypeScript**, **Vite** y **Tailwind CSS v4**.
 
 ---
 
 ## 🚀 Arquitectura y Decisiones de Diseño
 
-### 1. Sistema de Carga Nivel Senior (Resiliencia ante CORS)
+### 1. Sistema de Carga (Resiliencia ante CORS)
 *   **JSONP como Mecanismo Principal**: Aunque las especificaciones del PDF sugerían el uso del proxy de CORS de *AllOrigins*, los servidores de proxies gratuitos sufren caídas frecuentes o bloqueos por parte del CDN de Apple (errores Cloudflare 522). Al descubrir que la API de iTunes soporta **JSONP** de forma nativa (`&callback=`), he implementado un wrapper en [apiClient.ts](src/services/apiClient.ts) que inyecta elementos `<script>` de forma dinámica y limpia.
 *   **Inmunidad a CORS**: JSONP es completamente inmune al bloqueo de CORS por diseño del navegador.
 *   **Fallback en Cascada**: Si JSONP fallase, el cliente API pasa de forma automática a intentar la petición directa y, como último recurso, a través del proxy de *AllOrigins*, garantizando que la aplicación nunca se quede colgada.

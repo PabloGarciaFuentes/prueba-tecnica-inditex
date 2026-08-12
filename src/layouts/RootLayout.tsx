@@ -1,4 +1,5 @@
 import { Link, Outlet, useNavigation } from 'react-router-dom'
+import { ThinkingOrb } from 'thinking-orbs';
 
 export default function RootLayout() {
   const navigation = useNavigation()
@@ -18,12 +19,20 @@ export default function RootLayout() {
           </Link>
 
           {/* Loading Indicator */}
-          <div className="flex items-center justify-center w-8 h-8">
+          <div className="flex items-center justify-center">
             {isLoading && (
-              <span className="relative flex h-4 w-4">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-600"></span>
-              </span>
+              <div className="flex items-center gap-2">
+                <ThinkingOrb 
+                  theme="light"
+                  state="composing" 
+                  size={64} 
+                  speed={1.5}
+                  style={{
+                    filter: 'brightness(0) saturate(100%) invert(27%) sepia(85%) saturate(2462%) hue-rotate(213deg) brightness(97%) contrast(101%)'
+                  }}
+                />
+                <span className="t-shimmer" data-text="Loading…">Loading…</span>
+              </div>
             )}
           </div>
         </div>

@@ -9,3 +9,23 @@ body {
   @apply bg-slate-50 text-slate-800 antialiased;
   font-family: var(--font-sans);
 }
+
+.t-shimmer {
+  position: relative;
+  display: inline-block;
+  color: #94a3b8;
+  background: linear-gradient(to right, #94a3b8 20%, #2563eb 40%, #2563eb 60%, #94a3b8 80%);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 2.5s linear infinite;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
