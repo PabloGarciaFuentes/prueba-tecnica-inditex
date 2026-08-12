@@ -2,7 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import RootLayout from './layouts/RootLayout'
 import MainPage, { loader as mainPageLoader } from './pages/MainPage'
 import PodcastPage, { loader as podcastPageLoader } from './pages/PodcastPage'
-import EpisodePage from './pages/EpisodePage'
+import EpisodePage, { loader as episodePageLoader } from './pages/EpisodePage'
 
 const router = createBrowserRouter([
   {
@@ -22,6 +22,7 @@ const router = createBrowserRouter([
       {
         path: 'podcast/:podcastId/episode/:episodeId',
         element: <EpisodePage />,
+        loader: episodePageLoader,
       },
     ],
   },
