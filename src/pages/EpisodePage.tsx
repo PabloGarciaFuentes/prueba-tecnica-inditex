@@ -62,15 +62,15 @@ export default function EpisodePage() {
                 <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-lg p-4 animate-pulse">
                   <ThinkingOrb 
                     theme="light"
-                    state="listening" 
+                    state="composing" 
                     size={20} 
                     speed={1.5}
                     style={{
                       filter: 'brightness(0) saturate(100%) invert(27%) sepia(85%) saturate(2462%) hue-rotate(213deg) brightness(97%) contrast(101%)'
                     }}
                   />
-                  <span className="t-shimmer" data-text="Cargando pista de audio…">
-                    Cargando pista de audio…
+                  <span className="t-shimmer" data-text="Loading audio track…">
+                    Loading audio track...
                   </span>
                 </div>
               )}

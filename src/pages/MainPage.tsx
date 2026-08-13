@@ -1,5 +1,5 @@
-import { useState, useTransition } from 'react'
-import { useLoaderData, Link } from 'react-router-dom'
+import { useTransition } from 'react'
+import { useLoaderData, Link, useSearchParams } from 'react-router-dom'
 import type { Podcast } from '../types/podcast.types'
 import { apiClient } from '../services/apiClient'
 
@@ -9,14 +9,19 @@ export async function loader() {
 
 export default function MainPage() {
   const allPodcasts = useLoaderData() as Podcast[]
-  const [filterText, setFilterText] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const filterText = searchParams.get('search') || ''
   const [, startTransition] = useTransition()
 
-  // We filter immediate or using standard react transition to keep input responsive
+  // We update the URL query parameter using React Router state to keep the input responsive
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     startTransition(() => {
-      setFilterText(value)
+      if (value) {
+        setSearchParams({ search: value }, { replace: true })
+      } else {
+        setSearchParams({}, { replace: true })
+      }
     })
   }
 
@@ -42,6 +47,7 @@ export default function MainPage() {
           id="podcast-search-filter"
           name="searchFilter"
           type="text"
+          value={filterText}
           placeholder="Filter podcasts..."
           aria-label="Filter podcasts by title or author"
           onChange={handleFilterChange}
