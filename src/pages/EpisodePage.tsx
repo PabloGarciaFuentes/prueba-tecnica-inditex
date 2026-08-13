@@ -1,8 +1,8 @@
 import { useLoaderData, useParams } from 'react-router-dom'
 import type { PodcastDetail } from '../types/podcast.types'
 import { apiClient } from '../services/apiClient'
-import PodcastSidebar from '../components/PodcastSidebar'
-import EpisodeDetail from '../components/EpisodeDetail'
+import PodcastSidebar from '../components/common/PodcastSidebar'
+import EpisodeDetail from '../components/episode/EpisodeDetail'
 
 export async function loader({ params }: { params: Record<string, string | undefined> }) {
   const { podcastId } = params

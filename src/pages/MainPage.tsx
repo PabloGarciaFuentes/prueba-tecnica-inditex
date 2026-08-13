@@ -2,8 +2,8 @@ import { useTransition } from 'react'
 import { useLoaderData, useSearchParams } from 'react-router-dom'
 import type { Podcast } from '../types/podcast.types'
 import { apiClient } from '../services/apiClient'
-import PodcastSearch from '../components/PodcastSearch'
-import PodcastGrid from '../components/PodcastGrid'
+import PodcastSearch from '../components/main/PodcastSearch'
+import PodcastGrid from '../components/main/PodcastGrid'
 
 export async function loader() {
   return await apiClient.getTopPodcasts()

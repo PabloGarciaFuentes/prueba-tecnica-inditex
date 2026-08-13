@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import type { Episode } from '../types/podcast.types'
-import { formatDate } from '../utils/dateFormatter'
-import { formatDuration } from '../utils/durationFormatter'
+import type { Episode } from '../../types/podcast.types'
+import { formatDate } from '../../utils/dateFormatter'
+import { formatDuration } from '../../utils/durationFormatter'
 
 interface EpisodeTableProps {
   episodes: Episode[]

@@ -1,4 +1,4 @@
-import type { Podcast } from '../types/podcast.types'
+import type { Podcast } from '../../types/podcast.types'
 import PodcastCard from './PodcastCard'
 
 interface PodcastGridProps {

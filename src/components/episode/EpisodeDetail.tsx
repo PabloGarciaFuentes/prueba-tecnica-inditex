@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ThinkingOrb } from 'thinking-orbs'
-import type { Episode } from '../types/podcast.types'
+import type { Episode } from '../../types/podcast.types'
 
 interface EpisodeDetailProps {
   episode: Episode
@@ -16,7 +16,7 @@ export default function EpisodeDetail({ episode }: EpisodeDetailProps) {
         {episode.title}
       </h2>
 
-      {/* Episode Description (rendered as HTML, not escaped, italicized like the PDF) */}
+      {/* Episode Description (rendered as HTML, not escaped, initialized in italics like the PDF) */}
       <div 
         dangerouslySetInnerHTML={{ __html: episode.description }}
         className="text-slate-500 italic text-sm leading-relaxed border-b border-slate-100 pb-8 prose max-w-none"
